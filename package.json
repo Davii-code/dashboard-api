@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/infra/http/server.ts",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
     "test:coverage": "npm test -- --coverage",
     "build": "tsc",
@@ -21,7 +21,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

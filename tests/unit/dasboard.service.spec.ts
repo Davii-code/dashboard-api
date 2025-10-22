@@ -1,51 +1,49 @@
-import { DashboardService } from '../../src/services/dashboard.service';
-import { PrismaClient } from '@prisma/client';
-
-jest.mock('@prisma/client', () => {
-    const mPrismaClient = {
-        sale: {
-            findMany: jest.fn(),
-        },
-    };
-    return { PrismaClient: jest.fn(() => mPrismaClient) };
-});
+import {DashboardService} from "../../src/modules/services/dashboard.service";
+import {Sale} from "@prisma/client";
 
 describe('DashboardService', () => {
-    let dashboardService: DashboardService;
-    let prismaMock: { sale: { findMany: jest.Mock } };
+    let service: DashboardService;
+    let repoMock: { findByDateRange: jest.Mock };
 
     beforeEach(() => {
-        dashboardService = new DashboardService();
-        prismaMock = new PrismaClient() as any;
+        repoMock = { findByDateRange: jest.fn() };
+        service = new DashboardService(repoMock as any);
     });
 
     it('deve retornar dados formatados para gráfico de pizza', async () => {
-        prismaMock.sale.findMany.mockResolvedValue([
-            { category: 'Eletrônicos', amount: 100, saleDate: new Date() },
-            { category: 'Roupas', amount: 50, saleDate: new Date() },
-            { category: 'Eletrônicos', amount: 150, saleDate: new Date() },
-        ]);
+        const fakeSales: Sale[] = [
+            { id: 1, product: 'Notebook', category: 'Eletrônicos', amount: 1200, saleDate: new Date(), createdAt: new Date() },
+            { id: 2, product: 'Camiseta', category: 'Roupas', amount: 200, saleDate: new Date(), createdAt: new Date() },
+            { id: 3, product: 'Notebook', category: 'Eletrônicos', amount: 300, saleDate: new Date(), createdAt: new Date() },
+        ];
 
-        const result = await dashboardService.getChartData(
-            'pizza',
-            '2025-01-01',
-            '2025-12-31'
-        );
+        repoMock.findByDateRange.mockResolvedValue(fakeSales);
+
+        const result = await service.getChartData('pie', '2025-01-01', '2025-12-31');
 
         if ('type' in result) {
             expect(result.type).toBe('pie');
             expect(result.labels).toContain('Eletrônicos');
-            expect(result.data[0]).toBeGreaterThan(0);
+            expect(result.labels).toContain('Roupas');
+            expect(result.data.length).toBe(2);
         } else {
-            fail(`Esperava dados de gráfico, mas veio mensagem: ${result.message}`);
+            fail('Esperava dados de gráfico, mas veio mensagem.');
         }
     });
 
     it('deve retornar mensagem para tipo de gráfico inválido', async () => {
-        prismaMock.sale.findMany.mockResolvedValue([]);
-        const result = await dashboardService.getChartData('xyz', '2025-01-01', '2025-12-31');
-        if ('message' in result) {
-            expect(result.message).toContain('Tipo de gráfico inválido');
-        }
+        repoMock.findByDateRange.mockResolvedValue([]);
+        const result = await service.getChartData('xyz', '2025-01-01', '2025-12-31');
+        expect(result).toHaveProperty('message');
+        if ('message' in result)
+         expect(result.message).toMatch(/inválido/i);
+    });
+
+    it('deve retornar mensagem quando não há dados', async () => {
+        repoMock.findByDateRange.mockResolvedValue([]);
+        const result = await service.getChartData('pie', '2025-01-01', '2025-12-31');
+        expect(result).toHaveProperty('message');
+        if ('message' in result)
+            expect(result.message).toMatch(/Nenhum dado/);
     });
 });
