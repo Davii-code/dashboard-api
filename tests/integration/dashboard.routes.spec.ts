@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { setupTestDB } from '../setupTestDB';
-import {app} from "../../src/infra/http/server";
+import {app} from "../../src/infra/http/app";
 
 beforeAll(async () => {
     await setupTestDB();

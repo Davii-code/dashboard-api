@@ -13,7 +13,7 @@ export function validateDates(req: Request, _res: Response, next: NextFunction) 
         throw new AppError('Datas inválidas. Use o formato YYYY-MM-DD.', 400);
     }
     if (new Date(start) > new Date(end)) {
-        throw new AppError('"dataInicio" não pode ser maior que "dataFim".', 400);
+        throw new AppError('"data Inicio" não pode ser maior que "data Fim".', 400);
     }
     next();
 }

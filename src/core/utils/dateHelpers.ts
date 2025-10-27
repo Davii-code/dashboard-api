@@ -1,5 +1,4 @@
 export function isValidISODate(d: string): boolean {
-    // aceita YYYY-MM-DD
     return /^\d{4}-\d{2}-\d{2}$/.test(d) && !Number.isNaN(new Date(d).getTime());
 }
 
